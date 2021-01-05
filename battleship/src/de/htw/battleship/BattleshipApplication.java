@@ -21,6 +21,9 @@ public class BattleshipApplication {
         battleshipApplication.mainMenu();
     }
 
+    /**
+     * Prints a menu to the user, lets them choose an option and executes the chosen option
+     */
     private void mainMenu() {
 
         // TODO print main menu to the console. let user select an option. (s. Aufgabe 3)
@@ -77,19 +80,30 @@ public class BattleshipApplication {
 
     /**
      * Checks if file "battleship.save" exists
+     * @return Whether the save file exists
      */
     private boolean hasSavedGame() {
         return saveFilePath.toFile().exists();
     }
 
+    /**
+     * Checks if game is running (or rather not null or finished)
+     * @return Whether the game is running or not
+     */
     private boolean hasRunningGame() {
         return !(game == null || game.isFinished());
     }
 
+    /**
+     * Continues the game
+     */
     private void continueGame() {
         this.game.run();
     }
 
+    /**
+     * Starts a new game
+     */
     private void startNewGame() {
         this.game = new BattleshipGame();
         continueGame();

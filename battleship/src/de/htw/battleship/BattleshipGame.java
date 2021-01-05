@@ -53,6 +53,10 @@ public class BattleshipGame {
         }
     }
 
+    /**
+     * Prompts the player to input their shot and executes it.
+     * If the player just hits enter they get back to the main menu.
+     */
     private void playersTurn() {
 
         System.out.println("Spieler ist am Zug.");
@@ -71,7 +75,9 @@ public class BattleshipGame {
         pause();
     }
 
-
+    /**
+     * Lets the villain (computer) choose and play their shot.
+     */
     private void villainsTurn() {
 
         System.out.println("Gegner ist am Zug.");
@@ -96,6 +102,7 @@ public class BattleshipGame {
 
     /**
      * Gets an array with the two coordinates (x,y) the villain shoots at.
+     * @return An array with the two coordinates of the villain's shot.
      */
     private int[] getVillainShot() {
         int x;
@@ -113,6 +120,10 @@ public class BattleshipGame {
     }
 
 
+    /**
+     * Checks if game is finished
+     * @return Whether game ist finished or not.
+     */
     public boolean isFinished() {
         return playerBoard.isWholeFleetSunk() || villainBoard.isWholeFleetSunk();
     }
@@ -120,6 +131,7 @@ public class BattleshipGame {
 
     /**
      * Converts alphanumeric board coordinates to array indexes, e.g. A1 to [0,0]
+     * @return An array containing the coordinates from the input string.
      */
     public static int[] convertCoordinatesToInt(String input) {
         int x = input.toUpperCase().charAt(0) - 65;
@@ -129,6 +141,7 @@ public class BattleshipGame {
 
     /**
      * Converts array indexes to ahlphanumeric board coordinates, e.g. [0,0] to A1
+     * @return String coordinates made from the numeric board coordinates.
      */
     public static String convertCoordinatesToString(int[] input) {
         char x = (char) (input[0] + 65);

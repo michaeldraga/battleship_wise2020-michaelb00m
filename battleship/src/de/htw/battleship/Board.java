@@ -78,6 +78,10 @@ public class Board {
         }
     }
 
+    /**
+     * Exports the board as one string.
+     * @return A string containing the board fields
+     */
     public String exportAsString() {
         StringBuilder builder = new StringBuilder();
         for (int y = 0; y < BOARD_SIZE; y++) {
@@ -90,6 +94,7 @@ public class Board {
     }
 
     /**
+     * Checks if the whole fleet is sunk.
      * @return FALSE if at least one ship is remaining. TRUE otherwise.
      */
     public boolean isWholeFleetSunk() {
@@ -102,6 +107,12 @@ public class Board {
         return true;
     }
 
+    /**
+     * Gets the value of the field at coordinates x, y
+     * @param x x coordinate on the board.
+     * @param y y coordinate on the board.
+     * @return The value of the speicified field.
+     */
     public char getField(int x, int y) {
         return fields[x][y];
     }
