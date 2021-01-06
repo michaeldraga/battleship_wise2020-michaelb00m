@@ -78,8 +78,6 @@ public class BattleshipGame {
 
         // TODO (s. Aufgabe 5)
         String input = new Scanner(System.in).nextLine();
-//        System.out.println(input);
-//        System.out.println(validateInput(input));
         if (validateInput(input)) {
             playerShot = convertCoordinatesToInt(input);
         }
@@ -99,7 +97,6 @@ public class BattleshipGame {
 
         if (result > 0)
             playersTurn();
-//        pause();
     }
 
     /**

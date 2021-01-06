@@ -110,9 +110,7 @@ public class Board {
         // TODO generate ships (s. Aufgabe 4)+
         for (int i = 0; i < ships.length; i++) {
             int shipLength = ships[i];
-//            System.out.println(shipLength);
             int[] position = generatePosition(shipLength);
-//            System.out.println(position[0] + " " + position[1] + " " + position[2]);
             boolean horizontal = position[2] == 1;
             boolean vertical = position[2] == 0;
             for (int j = 0; j < shipLength; j++) {
