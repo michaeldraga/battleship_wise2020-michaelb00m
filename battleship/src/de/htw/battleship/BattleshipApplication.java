@@ -40,6 +40,7 @@ public class BattleshipApplication {
             }
             if (option == 1) {
                 startNewGame();
+                break;
             } else if (option == 2) {
                 break;
             } else {
@@ -71,7 +72,8 @@ public class BattleshipApplication {
                     saveGame();
                     break;
                 case 5:
-                    this.game.running = false;
+                    this.game = null;
+                    break;
                 default:
                     wrongInput();
             }
