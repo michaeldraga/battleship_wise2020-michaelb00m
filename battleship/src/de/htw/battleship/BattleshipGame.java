@@ -54,6 +54,8 @@ public class BattleshipGame {
     }
 
     private static boolean validateInput(String input) {
+        if (input.length() == 0)
+            return false;
         try {
             return !(input.length() > 3 ||
                 input.toUpperCase().charAt(0) - 65 < 0 ||
@@ -62,6 +64,14 @@ public class BattleshipGame {
                 Integer.parseInt(input.substring(1)) > 10);
         } catch (NumberFormatException e) {
             return false;
+        }
+    }
+
+    private static void printResult(int result) {
+        switch (result) {
+            case 0 -> System.out.println("Daneben! Schade...");
+            case 1 -> System.out.println("Treffer!");
+            case 2 -> System.out.println("Piratenschiff versenkt!");
         }
     }
 
@@ -89,11 +99,7 @@ public class BattleshipGame {
         }
         int result = villainBoard.shoot(playerShot);
 
-        switch (result) {
-            case 0 -> System.out.println("Daneben! Schade...");
-            case 1 -> System.out.println("Treffer!");
-            case 2 -> System.out.println("Piratenschiff versenkt!");
-        }
+        printResult(result);
 
         if (result > 0)
             playersTurn();
@@ -109,8 +115,14 @@ public class BattleshipGame {
         int[] villainShot = getVillainShot();
 
         // TODO (s. Aufgabe 6)
+        int result = playerBoard.shoot(villainShot);
 
-        pause();
+        printResult(result);
+
+        if (result > 0) {
+            pause();
+            villainsTurn();
+        }
     }
 
     /**
