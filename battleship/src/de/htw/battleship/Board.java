@@ -18,10 +18,45 @@ public class Board {
     public static final int[] ships = new int[]{5, 4, 3, 3, 2, 2};
 
     private final char[][] fields = new char[BOARD_SIZE][BOARD_SIZE];
+    private final int[][] shipPositions = new int[6][4];
 
-    private static boolean horizontal() {
-        Random r = new Random();
-        return r.nextInt(2) == 1;
+    public int shoot(int[] coordinates) {
+        int x = coordinates[0];
+        int y = coordinates[1];
+        boolean hit = fields[x][y] == SHIP;
+        fields[x][y] = hit ? HIT : MISSED_SHOT;
+        for (int i = 0; i < shipPositions.length; i++) {
+            if (shipPositions[i] == null)
+                continue;
+            if (isShipSunk(shipPositions[i][0], shipPositions[i][1], shipPositions[i][2], shipPositions[i][3])) {
+                shipPositions[i] = null;
+                return 2;
+            }
+        }
+        return hit ? 1 : 0;
+    }
+
+    private void addPosition(int x, int y, int shipLength, int horizontal) {
+        for (int i = 0; i < shipPositions.length; i++) {
+            if (shipPositions[i][2] == 0) {
+                shipPositions[i][0] = x;
+                shipPositions[i][1] = y;
+                shipPositions[i][2] = shipLength;
+                shipPositions[i][3] = horizontal;
+                return;
+            }
+        }
+    }
+
+    private boolean isShipSunk(int x, int y, int shipLength, int horizontal) {
+        int right = horizontal;
+        int down = (horizontal - 1) * -1;
+        for (int i = 0; i < shipLength; i++) {
+            if (fields[x + i * right][y + i * down] == SHIP) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private boolean checkSurroundings(int x, int y) {
@@ -29,15 +64,15 @@ public class Board {
         int right = x >= BOARD_SIZE - 1 ? 0 : 1;
         int up = y == 0 ? 0 : 1;
         int down = y >= BOARD_SIZE - 1 ? 0 : 1;
-        return fields[y - up][x - left] == SHIP ||
-                fields[y - up][x] == SHIP ||
-                fields[y - up][x + right] == SHIP ||
-                fields[y][x - left] == SHIP ||
-                fields[y][x] == SHIP ||
-                fields[y][x + right] == SHIP ||
-                fields[y + down][x - left] == SHIP ||
-                fields[y + down][x] == SHIP ||
-                fields[y + down][x + right] == SHIP;
+        return fields[x - left][y - up] == SHIP ||
+                fields[x - left][y] == SHIP ||
+                fields[x - left][y + down] == SHIP ||
+                fields[x][y - up] == SHIP ||
+                fields[x][y] == SHIP ||
+                fields[x][y + down] == SHIP ||
+                fields[x + right][y - up] == SHIP ||
+                fields[x + right][y] == SHIP ||
+                fields[x + right][y + down] == SHIP;
     }
 
     private int[] generatePosition(int shipLength) {
@@ -46,9 +81,6 @@ public class Board {
         while (true) {
             horizontal = r.nextBoolean();
             int x = r.nextInt(BOARD_SIZE - (horizontal ? shipLength : 0));
-            if (!horizontal) {
-                System.out.println(x + shipLength);
-            }
             int y = r.nextInt(BOARD_SIZE - (!horizontal ? shipLength : 0));
             boolean collides = false;
             for (int i = 0; i < shipLength; i++) {
@@ -60,9 +92,9 @@ public class Board {
             }
             if (collides)
                 continue;
+            this.addPosition(x, y, shipLength, horizontal ? 1 : 0);
             return new int[]{x, y, horizontal ? 1 : 0};
         }
-
     }
 
     /**
@@ -84,7 +116,7 @@ public class Board {
             boolean horizontal = position[2] == 1;
             boolean vertical = position[2] == 0;
             for (int j = 0; j < shipLength; j++) {
-                fields[position[1] + (vertical ? j : 0)][position[0] + (horizontal ? j : 0)] = SHIP;
+                fields[position[0] + (horizontal ? j : 0)][position[1] + (vertical ? j : 0)] = SHIP;
             }
         }
 

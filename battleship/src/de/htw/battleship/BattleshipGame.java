@@ -26,8 +26,8 @@ public class BattleshipGame {
      * Creates a new game with new boards.
      */
     public BattleshipGame() {
-        playerBoard = new Board();
-        villainBoard = new Board();
+        this.playerBoard = new Board();
+        this.villainBoard = new Board();
     }
 
     /**
@@ -53,6 +53,18 @@ public class BattleshipGame {
         }
     }
 
+    private static boolean validateInput(String input) {
+        try {
+            return !(input.length() > 3 ||
+                input.toUpperCase().charAt(0) - 65 < 0 ||
+                input.toUpperCase().charAt(0) - 65 > 10 ||
+                Integer.parseInt(input.substring(1)) < 0 ||
+                Integer.parseInt(input.substring(1)) > 10);
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
     /**
      * Prompts the player to input their shot and executes it.
      * If the player just hits enter they get back to the main menu.
@@ -65,14 +77,29 @@ public class BattleshipGame {
         int[] playerShot = null;
 
         // TODO (s. Aufgabe 5)
-
+        String input = new Scanner(System.in).nextLine();
+//        System.out.println(input);
+//        System.out.println(validateInput(input));
+        if (validateInput(input)) {
+            playerShot = convertCoordinatesToInt(input);
+        }
         // player wants to exit game
         if (playerShot == null) {
             System.out.println("Spiel pausiert.");
             running = false;
+            return;
+        }
+        int result = villainBoard.shoot(playerShot);
+
+        switch (result) {
+            case 0 -> System.out.println("Daneben! Schade...");
+            case 1 -> System.out.println("Treffer!");
+            case 2 -> System.out.println("Piratenschiff versenkt!");
         }
 
-        pause();
+        if (result > 0)
+            playersTurn();
+//        pause();
     }
 
     /**
