@@ -1,6 +1,5 @@
 package de.htw.battleship;
 
-import java.util.List;
 import java.util.Random;
 
 /**
@@ -16,7 +15,55 @@ public class Board {
 
     public static final int BOARD_SIZE = 10;
 
+    public static final int[] ships = new int[]{5, 4, 3, 3, 2, 2};
+
     private final char[][] fields = new char[BOARD_SIZE][BOARD_SIZE];
+
+    private static boolean horizontal() {
+        Random r = new Random();
+        return r.nextInt(2) == 1;
+    }
+
+    private boolean checkSurroundings(int x, int y) {
+        int left = x == 0 ? 0 : 1;
+        int right = x >= BOARD_SIZE - 1 ? 0 : 1;
+        int up = y == 0 ? 0 : 1;
+        int down = y >= BOARD_SIZE - 1 ? 0 : 1;
+        return fields[y - up][x - left] == SHIP ||
+                fields[y - up][x] == SHIP ||
+                fields[y - up][x + right] == SHIP ||
+                fields[y][x - left] == SHIP ||
+                fields[y][x] == SHIP ||
+                fields[y][x + right] == SHIP ||
+                fields[y + down][x - left] == SHIP ||
+                fields[y + down][x] == SHIP ||
+                fields[y + down][x + right] == SHIP;
+    }
+
+    private int[] generatePosition(int shipLength) {
+        Random r = new Random();
+        boolean horizontal;
+        while (true) {
+            horizontal = r.nextBoolean();
+            int x = r.nextInt(BOARD_SIZE - (horizontal ? shipLength : 0));
+            if (!horizontal) {
+                System.out.println(x + shipLength);
+            }
+            int y = r.nextInt(BOARD_SIZE - (!horizontal ? shipLength : 0));
+            boolean collides = false;
+            for (int i = 0; i < shipLength; i++) {
+                if (checkSurroundings(x + (horizontal ? i : 0),
+                        y + (!horizontal ? i : 0))) {
+                    collides = true;
+                    break;
+                }
+            }
+            if (collides)
+                continue;
+            return new int[]{x, y, horizontal ? 1 : 0};
+        }
+
+    }
 
     /**
      * Create a new Board and generate ships
@@ -28,9 +75,18 @@ public class Board {
             }
         }
 
-        // TODO generate ships (s. Aufgabe 4)
-
-
+        // TODO generate ships (s. Aufgabe 4)+
+        for (int i = 0; i < ships.length; i++) {
+            int shipLength = ships[i];
+//            System.out.println(shipLength);
+            int[] position = generatePosition(shipLength);
+//            System.out.println(position[0] + " " + position[1] + " " + position[2]);
+            boolean horizontal = position[2] == 1;
+            boolean vertical = position[2] == 0;
+            for (int j = 0; j < shipLength; j++) {
+                fields[position[1] + (vertical ? j : 0)][position[0] + (horizontal ? j : 0)] = SHIP;
+            }
+        }
 
 
     }
@@ -80,6 +136,7 @@ public class Board {
 
     /**
      * Exports the board as one string.
+     *
      * @return A string containing the board fields
      */
     public String exportAsString() {
@@ -95,6 +152,7 @@ public class Board {
 
     /**
      * Checks if the whole fleet is sunk.
+     *
      * @return FALSE if at least one ship is remaining. TRUE otherwise.
      */
     public boolean isWholeFleetSunk() {
@@ -109,6 +167,7 @@ public class Board {
 
     /**
      * Gets the value of the field at coordinates x, y
+     *
      * @param x x coordinate on the board.
      * @param y y coordinate on the board.
      * @return The value of the speicified field.
