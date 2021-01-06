@@ -8,6 +8,17 @@ import java.util.Scanner;
  */
 public class BattleshipGame {
 
+    public static final String ANSI_RESET = "\u001B[0m";
+    public static final String ANSI_BLACK = "\u001B[30m";
+    public static final String ANSI_RED = "\u001B[31m";
+    public static final String ANSI_GREEN = "\u001B[32m";
+    public static final String ANSI_YELLOW = "\u001B[33m";
+    public static final String ANSI_BLUE = "\u001B[34m";
+    public static final String ANSI_PURPLE = "\u001B[35m";
+    public static final String ANSI_CYAN = "\u001B[36m";
+    public static final String ANSI_WHITE = "\u001B[37m";
+
+
     final Board playerBoard;
     final Board villainBoard;
 
@@ -20,7 +31,7 @@ public class BattleshipGame {
      * When playing, enemy ships should be hidden from the player.
      * Change below to FALSE for testing purposes during development of this program.
      */
-    private final boolean hideVillainShips = false;
+    private final boolean hideVillainShips = true;
 
     /**
      * Creates a new game with new boards.
@@ -44,12 +55,12 @@ public class BattleshipGame {
      * Interrupt the loop to get back to main menu.
      */
     public void run() {
-        running = true;
-        System.out.println("Spiel gestartet. Drücke ENTER während der Zieleingabe, im zum Hauptmenü zurückzukehren.");
+        this.running = true;
+        System.out.println("Spiel gestartet. Drücke ENTER während der Zieleingabe, im zum Hauptmenü zurückzukehren.\n");
 
-        while (running) {
+        while (this.running) {
             playersTurn();
-            if (running) villainsTurn();
+            if (this.running) villainsTurn();
         }
     }
 
@@ -83,6 +94,7 @@ public class BattleshipGame {
 
         System.out.println("Spieler ist am Zug.");
         villainBoard.print(hideVillainShips);
+        System.out.println();
 
         int[] playerShot = null;
 
@@ -101,6 +113,13 @@ public class BattleshipGame {
 
         printResult(result);
 
+        System.out.println();
+
+        if (this.isFinished()) {
+            this.running = false;
+            return;
+        }
+
         if (result > 0)
             playersTurn();
     }
@@ -112,6 +131,7 @@ public class BattleshipGame {
 
         System.out.println("Gegner ist am Zug.");
         playerBoard.print(false);
+        System.out.println();
         int[] villainShot = getVillainShot();
 
         // TODO (s. Aufgabe 6)
@@ -119,8 +139,14 @@ public class BattleshipGame {
 
         printResult(result);
 
+        System.out.println();
+
+        if (this.isFinished()) {
+            this.running = false;
+            return;
+        }
+
         if (result > 0) {
-            pause();
             villainsTurn();
         }
     }
