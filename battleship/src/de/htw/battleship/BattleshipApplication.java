@@ -30,8 +30,10 @@ public class BattleshipApplication {
 
         int option;
         while (true) {
-            printMenu();
+            int nOfOptions = printMenu();
+            System.out.print("\nOption: ");
             String input = new Scanner(System.in).nextLine();
+            System.out.println();
             try {
                 option = Integer.parseInt(input);
             } catch (NumberFormatException e) {
@@ -50,10 +52,12 @@ public class BattleshipApplication {
             } else if (option == 3) {
                 if (hasRunningGame() && hasSavedGame())
                     loadGame();
+                else if (hasRunningGame())
+                    saveGame();
                 else
                     break;
             } else if (option == 4) {
-                if (hasRunningGame())
+                if (hasRunningGame() && nOfOptions > 3)
                     saveGame();
                 else
                     break;
@@ -73,7 +77,7 @@ public class BattleshipApplication {
                 "(Zahl ohne Klammer) und bestätigen Sie mit ENTER.");
     }
 
-    private void printMenu() {
+    private int printMenu() {
         int n = 0;
         boolean runningGame = hasRunningGame();
         String menuOutput = String.format("(%d) Neues Spiel starten\n", ++n);
@@ -82,6 +86,7 @@ public class BattleshipApplication {
         menuOutput += runningGame ? String.format("(%d) Spiel speichern\n", ++n) : "";
         menuOutput += String.format("(%d) Beenden", ++n);
         System.out.println(menuOutput);
+        return n;
     }
 
 
@@ -101,10 +106,10 @@ public class BattleshipApplication {
             Board villainBoard = new Board(boards[1]);
             this.game = new BattleshipGame(playerBoard, villainBoard);
 
-            System.out.println("Load successful");
+            System.out.println("Erfolgreich geladen.\n");
         } catch (IOException e) {
             e.printStackTrace();
-            System.out.println("Loading failed");
+            System.out.println("Laden fehlgeschlagen.\n");
         }
     }
 
@@ -122,10 +127,10 @@ public class BattleshipApplication {
             String villainBoard = game.villainBoard.exportAsString();
             Files.writeString(file.toPath(), playerBoard + villainBoard, StandardCharsets.UTF_8);
 
-            System.out.println("Save successful");
+            System.out.println("Erfolgreich gespeichert.\n");
         } catch (IOException e) {
             e.printStackTrace();
-            System.out.println("Save failed");
+            System.out.println("Speichern fehlgeschlagen.\n");
         }
     }
 
