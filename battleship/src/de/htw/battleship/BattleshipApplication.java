@@ -40,42 +40,27 @@ public class BattleshipApplication {
             }
             if (option == 1) {
                 startNewGame();
-                break;
             } else if (option == 2) {
+                if (hasRunningGame())
+                    continueGame();
+                else if (hasSavedGame())
+                    loadGame();
+                else
+                    break;
+            } else if (option == 3) {
+                if (hasRunningGame() && hasSavedGame())
+                    loadGame();
+                else
+                    break;
+            } else if (option == 4) {
+                if (hasRunningGame())
+                    saveGame();
+                else
+                    break;
+            } else if (option == 5) {
                 break;
             } else {
                 wrongInput();
-                continue;
-            }
-        }
-
-        while (hasRunningGame()) {
-            printMenu();
-            String input = new Scanner(System.in).nextLine();
-            try {
-                option = Integer.parseInt(input);
-            } catch (NumberFormatException e) {
-                wrongInput();
-                continue;
-            }
-            switch (option) {
-                case 1:
-                    startNewGame();
-                    break;
-                case 2:
-                    continueGame();
-                    break;
-                case 3:
-                    loadGame();
-                    break;
-                case 4:
-                    saveGame();
-                    break;
-                case 5:
-                    this.game = null;
-                    break;
-                default:
-                    wrongInput();
             }
         }
 
@@ -89,15 +74,13 @@ public class BattleshipApplication {
     }
 
     private void printMenu() {
-        String menuOutput = "(1) Neues Spiel starten\n";
-        if (hasRunningGame()) {
-            menuOutput += "(2) Spiel fortsetzen\n";
-            menuOutput += hasSavedGame() ? "(3) Spiel laden\n" : "";
-            menuOutput += "(4) Spiel speichern\n";
-            menuOutput += "(5) Beenden";
-        } else {
-            menuOutput += "(2) Beenden";
-        }
+        int n = 0;
+        boolean runningGame = hasRunningGame();
+        String menuOutput = String.format("(%d) Neues Spiel starten\n", ++n);
+        menuOutput += runningGame ? String.format("(%d) Spiel fortsetzen\n", ++n) : "";
+        menuOutput += hasSavedGame() ? String.format("(%d) Spiel laden\n", ++n) : "";
+        menuOutput += runningGame ? String.format("(%d) Spiel speichern\n", ++n) : "";
+        menuOutput += String.format("(%d) Beenden", ++n);
         System.out.println(menuOutput);
     }
 
@@ -117,6 +100,8 @@ public class BattleshipApplication {
             Board playerBoard = new Board(boards[0]);
             Board villainBoard = new Board(boards[1]);
             this.game = new BattleshipGame(playerBoard, villainBoard);
+
+            System.out.println("Load successful");
         } catch (IOException e) {
             e.printStackTrace();
             System.out.println("Loading failed");
@@ -137,6 +122,7 @@ public class BattleshipApplication {
             String villainBoard = game.villainBoard.exportAsString();
             Files.writeString(file.toPath(), playerBoard + villainBoard, StandardCharsets.UTF_8);
 
+            System.out.println("Save successful");
         } catch (IOException e) {
             e.printStackTrace();
             System.out.println("Save failed");
@@ -145,6 +131,7 @@ public class BattleshipApplication {
 
     /**
      * Checks if file "battleship.save" exists
+     *
      * @return Whether the save file exists
      */
     private boolean hasSavedGame() {
@@ -153,6 +140,7 @@ public class BattleshipApplication {
 
     /**
      * Checks if game is running (or rather not null or finished)
+     *
      * @return Whether the game is running or not
      */
     private boolean hasRunningGame() {
