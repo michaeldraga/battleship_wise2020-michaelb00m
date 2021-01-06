@@ -8,17 +8,6 @@ import java.util.Scanner;
  */
 public class BattleshipGame {
 
-    public static final String ANSI_RESET = "\u001B[0m";
-    public static final String ANSI_BLACK = "\u001B[30m";
-    public static final String ANSI_RED = "\u001B[31m";
-    public static final String ANSI_GREEN = "\u001B[32m";
-    public static final String ANSI_YELLOW = "\u001B[33m";
-    public static final String ANSI_BLUE = "\u001B[34m";
-    public static final String ANSI_PURPLE = "\u001B[35m";
-    public static final String ANSI_CYAN = "\u001B[36m";
-    public static final String ANSI_WHITE = "\u001B[37m";
-
-
     final Board playerBoard;
     final Board villainBoard;
 
@@ -31,7 +20,9 @@ public class BattleshipGame {
      * When playing, enemy ships should be hidden from the player.
      * Change below to FALSE for testing purposes during development of this program.
      */
-    private final boolean hideVillainShips = true;
+    private final boolean hideVillainShips = false;
+
+    private final int AILevel = 2;
 
     /**
      * Creates a new game with new boards.
@@ -99,6 +90,7 @@ public class BattleshipGame {
         int[] playerShot = null;
 
         // TODO (s. Aufgabe 5)
+        System.out.print("Feld: ");
         String input = new Scanner(System.in).nextLine();
         if (validateInput(input)) {
             playerShot = convertCoordinatesToInt(input);
@@ -111,9 +103,10 @@ public class BattleshipGame {
         }
         int result = villainBoard.shoot(playerShot);
 
+        System.out.println();
+
         printResult(result);
 
-        System.out.println();
 
         if (this.isFinished()) {
             this.running = false;
@@ -122,6 +115,8 @@ public class BattleshipGame {
 
         if (result > 0)
             playersTurn();
+        if (result == 0)
+            pause();
     }
 
     /**
@@ -130,21 +125,25 @@ public class BattleshipGame {
     private void villainsTurn() {
 
         System.out.println("Gegner ist am Zug.");
-        playerBoard.print(false);
-        System.out.println();
         int[] villainShot = getVillainShot();
+        System.out.println();
 
         // TODO (s. Aufgabe 6)
         int result = playerBoard.shoot(villainShot);
 
-        printResult(result);
+        playerBoard.print(false);
 
         System.out.println();
+
+        printResult(result);
+
 
         if (this.isFinished()) {
             this.running = false;
             return;
         }
+
+        pause();
 
         if (result > 0) {
             villainsTurn();
@@ -174,7 +173,7 @@ public class BattleshipGame {
         do {
             x = new Random().nextInt(Board.BOARD_SIZE);
             y = new Random().nextInt(Board.BOARD_SIZE);
-        } while (playerBoard.getField(x, y) != Board.EMPTY);
+        } while (playerBoard.getField(x, y) != Board.MISSED_SHOT && playerBoard.getField(x, y) == Board.HIT);
 
         int[] shot = new int[]{x, y};
         System.out.println("Gegner zielt auf " + convertCoordinatesToString(shot));
