@@ -8,6 +8,16 @@ import java.util.Random;
  */
 public class Board {
 
+    public static final String ANSI_RESET = "\u001B[0m";
+    public static final String ANSI_BLACK = "\u001B[30m";
+    public static final String ANSI_RED = "\u001B[31m";
+    public static final String ANSI_GREEN = "\u001B[32m";
+    public static final String ANSI_YELLOW = "\u001B[33m";
+    public static final String ANSI_BLUE = "\u001B[34m";
+    public static final String ANSI_PURPLE = "\u001B[35m";
+    public static final String ANSI_CYAN = "\u001B[36m";
+    public static final String ANSI_WHITE = "\u001B[37m";
+
     public static final char EMPTY = '.';
     public static final char SHIP = 'O';
     public static final char HIT = 'X';
@@ -23,8 +33,14 @@ public class Board {
     public int shoot(int[] coordinates) {
         int x = coordinates[0];
         int y = coordinates[1];
+        if (fields[x][y] == HIT)
+            return 0;
         boolean hit = fields[x][y] == SHIP;
-        fields[x][y] = hit ? HIT : MISSED_SHOT;
+        if (!hit) {
+            fields[x][y] = MISSED_SHOT;
+            return 0;
+        }
+        fields[x][y] = HIT;
         for (int i = 0; i < shipPositions.length; i++) {
             if (shipPositions[i] == null)
                 continue;
@@ -158,7 +174,7 @@ public class Board {
                 char output = fields[x][y];
                 if (output == SHIP && hideShips)
                     output = EMPTY;
-                System.out.print(output + " ");
+                System.out.print((output == SHIP ? ANSI_BLUE : output == HIT ? ANSI_RED : output == MISSED_SHOT ? ANSI_YELLOW : "") + output + (output != EMPTY ? ANSI_RESET : "") + " ");
             }
             System.out.println();
         }
