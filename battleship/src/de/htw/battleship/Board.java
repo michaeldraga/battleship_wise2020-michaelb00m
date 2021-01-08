@@ -213,7 +213,7 @@ public class Board {
      *
      * @param x x coordinate on the board.
      * @param y y coordinate on the board.
-     * @return The value of the speicified field.
+     * @return The value of the specified field.
      */
     public char getField(int x, int y) {
         return fields[x][y];
