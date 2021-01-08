@@ -49,7 +49,7 @@ public class Board {
                 return 2;
             }
         }
-        return hit ? 1 : 0;
+        return 1;
     }
 
     private void addPosition(int x, int y, int shipLength, int horizontal) {
@@ -65,10 +65,9 @@ public class Board {
     }
 
     private boolean isShipSunk(int x, int y, int shipLength, int horizontal) {
-        int right = horizontal;
         int down = (horizontal - 1) * -1;
         for (int i = 0; i < shipLength; i++) {
-            if (fields[x + i * right][y + i * down] == SHIP) {
+            if (fields[x + i * horizontal][y + i * down] == SHIP) {
                 return false;
             }
         }
