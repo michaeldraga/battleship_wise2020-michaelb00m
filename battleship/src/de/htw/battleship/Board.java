@@ -123,8 +123,7 @@ public class Board {
             }
         }
 
-        for (int i = 0; i < ships.length; i++) {
-            int shipLength = ships[i];
+        for (int shipLength : ships) {
             int[] position = generatePosition(shipLength);
             boolean horizontal = position[2] == 1;
             boolean vertical = position[2] == 0;
