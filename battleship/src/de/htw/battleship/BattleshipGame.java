@@ -105,8 +105,11 @@ public class BattleshipGame {
 
         System.out.println();
 
+        villainBoard.print(hideVillainShips);
+
         printResult(result);
 
+        villainBoard.deactivateLastMove();
 
         if (this.isFinished()) {
             System.out.println("\nSie haben gewonnen! Herzlichen Glückwunsch!\n");
@@ -114,10 +117,9 @@ public class BattleshipGame {
             return;
         }
 
+        pause();
         if (result > 0)
             playersTurn();
-        if (result == 0)
-            pause();
     }
 
     /**
@@ -137,6 +139,8 @@ public class BattleshipGame {
         System.out.println();
 
         printResult(result);
+
+        playerBoard.deactivateLastMove();
 
         if (result == 2)
             villainAI.loseMemory();

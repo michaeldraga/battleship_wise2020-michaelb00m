@@ -29,6 +29,7 @@ public class Board {
 
     private final char[][] fields = new char[BOARD_SIZE][BOARD_SIZE];
     private final int[][] shipPositions = new int[6][4];
+    private int[] lastMove = new int[] {-1, -1};
 
     public int shoot(int[] coordinates) {
         int x = coordinates[0];
@@ -38,6 +39,7 @@ public class Board {
         boolean hit = fields[x][y] == SHIP;
         if (!hit) {
             fields[x][y] = MISSED_SHOT;
+            lastMove = new int[] {x, y};
             return 0;
         }
         fields[x][y] = HIT;
@@ -46,9 +48,11 @@ public class Board {
                 continue;
             if (isShipSunk(shipPositions[i][0], shipPositions[i][1], shipPositions[i][2], shipPositions[i][3])) {
                 shipPositions[i] = null;
+                lastMove = new int[] {x, y};
                 return 2;
             }
         }
+        lastMove = new int[] {x, y};
         return 1;
     }
 
@@ -112,6 +116,10 @@ public class Board {
         }
     }
 
+    public void deactivateLastMove() {
+        this.lastMove = new int[] {-1, -1};
+    }
+
     /**
      * Create a new Board and generate ships
      */
@@ -171,7 +179,13 @@ public class Board {
                 char output = fields[x][y];
                 if (output == SHIP && hideShips)
                     output = EMPTY;
-                System.out.print((output == SHIP ? ANSI_BLUE : output == HIT ? ANSI_RED : output == MISSED_SHOT ? ANSI_YELLOW : "") + output + (output != EMPTY ? ANSI_RESET : "") + " ");
+                System.out.print(((lastMove[0] == x && lastMove[1] == y) ? ANSI_GREEN :
+                                    output == SHIP ? ANSI_BLUE :
+                                    output == HIT ? ANSI_RED :
+                                    output == MISSED_SHOT ? ANSI_YELLOW : "")
+                                    + output
+                                    + (output != EMPTY ? ANSI_RESET : "")
+                                    + " ");
             }
             System.out.println();
         }
