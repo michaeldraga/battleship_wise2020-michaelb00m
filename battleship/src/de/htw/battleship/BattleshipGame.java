@@ -146,7 +146,7 @@ public class BattleshipGame {
             villainAI.loseMemory();
 
         if (this.isFinished()) {
-            System.out.println("\nDer Gegner hat gewonnen. Hoffentlich hast du nächsten Mal mehr Glück!\n");
+            System.out.println("\nDer Gegner hat gewonnen. Hoffentlich hast du nächstes Mal mehr Glück!\n");
             this.running = false;
             return;
         }
