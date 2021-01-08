@@ -10,6 +10,7 @@ public class BattleshipGame {
 
     final Board playerBoard;
     final Board villainBoard;
+    final AI villainAI = new AI(2);
 
     /**
      * Set to TRUE to keep the game loop running. Set to FALSE to exit.
@@ -109,6 +110,7 @@ public class BattleshipGame {
 
 
         if (this.isFinished()) {
+            System.out.println("\nSie haben gewonnen! Herzlichen Glückwunsch!\n");
             this.running = false;
             return;
         }
@@ -125,6 +127,7 @@ public class BattleshipGame {
     private void villainsTurn() {
 
         System.out.println("Gegner ist am Zug.");
+        playerBoard.print(false);
         int[] villainShot = getVillainShot();
         System.out.println();
 
@@ -137,8 +140,11 @@ public class BattleshipGame {
 
         printResult(result);
 
+        if (result == 2)
+            villainAI.loseMemory();
 
         if (this.isFinished()) {
+            System.out.println("\nDer Gegner hat gewonnen. Hoffentlich hast du nächsten Mal mehr Glück!\n");
             this.running = false;
             return;
         }
@@ -170,12 +176,13 @@ public class BattleshipGame {
         int y;
 
         // Strategy to aim a shot: Pick a random field that is empty
-        do {
+        /*do {
             x = new Random().nextInt(Board.BOARD_SIZE);
             y = new Random().nextInt(Board.BOARD_SIZE);
         } while (playerBoard.getField(x, y) != Board.MISSED_SHOT && playerBoard.getField(x, y) == Board.HIT);
 
-        int[] shot = new int[]{x, y};
+        int[] shot = new int[]{x, y};*/
+        int[] shot = villainAI.nextMove(this.playerBoard);
         System.out.println("Gegner zielt auf " + convertCoordinatesToString(shot));
         return shot;
     }
@@ -206,7 +213,7 @@ public class BattleshipGame {
      */
     public static String convertCoordinatesToString(int[] input) {
         char x = (char) (input[0] + 65);
-        String y = Integer.toString(input[1]);
+        String y = Integer.toString(input[1] + 1);
         return x + y;
     }
 }
