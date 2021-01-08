@@ -59,7 +59,6 @@ public class AI {
             return move;
         }
         int[] move = advance(this.lastMoves.get(lastMoves.size() - 1));
-        // TODO fix potential move detection
         if (collidesWithBorder(move[0]) ||
                 collidesWithBorder(move[1]) ||
                 hitsAgain(move, playerBoard)) {

@@ -123,7 +123,6 @@ public class Board {
             }
         }
 
-        // TODO generate ships (s. Aufgabe 4)+
         for (int i = 0; i < ships.length; i++) {
             int shipLength = ships[i];
             int[] position = generatePosition(shipLength);

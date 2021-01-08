@@ -90,7 +90,6 @@ public class BattleshipGame {
 
         int[] playerShot = null;
 
-        // TODO (s. Aufgabe 5)
         System.out.print("Feld: ");
         String input = new Scanner(System.in).nextLine();
         if (validateInput(input)) {
@@ -131,7 +130,6 @@ public class BattleshipGame {
         int[] villainShot = getVillainShot();
         System.out.println();
 
-        // TODO (s. Aufgabe 6)
         int result = playerBoard.shoot(villainShot);
 
         playerBoard.print(false);

@@ -25,9 +25,6 @@ public class BattleshipApplication {
      * Prints a menu to the user, lets them choose an option and executes the chosen option
      */
     private void mainMenu() {
-
-        // TODO print main menu to the console. let user select an option. (s. Aufgabe 3)
-
         int option;
         while (true) {
             int nOfOptions = printMenu();
