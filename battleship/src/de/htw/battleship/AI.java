@@ -5,25 +5,65 @@ import java.util.Arrays;
 import java.util.Random;
 
 public class AI {
+    private final ArrayList<int[]> lastMoves = new ArrayList<>();
+    private final ArrayList<int[]> testedDifferences = new ArrayList<>();
+    private final int level;
+    private final Board playerBoard;
+
     private Boolean horizontal;
     private int direction;
-    private ArrayList<int[]> lastMoves = new ArrayList<>();
-    private ArrayList<int[]> testedDifferences = new ArrayList<>();
-    private int level = 2;
 
-    public AI(int level) {
+    public AI(int level, Board playerBoard) {
         this.level = level;
+        this. playerBoard = playerBoard;
     }
 
-    public int[] nextMove(Board playerBoard) {
+    public int[] nextMove() {
+        switch (this.level) {
+            case 0:
+                return level0Algorithm();
+            case 1:
+                return level1Algorithm();
+            case 2:
+                return level2Algorithm();
+            case 3:
+                break;
+            case 4:
+                return level4Algorithm();
+        }
+        return new int[2];
+    }
+
+    private int[] level0Algorithm() {
+        int x;
+        int y;
+
+        // Strategy to aim a shot: Pick a random field that is empty
+        do {
+            x = new Random().nextInt(Board.BOARD_SIZE);
+            y = new Random().nextInt(Board.BOARD_SIZE);
+        } while (playerBoard.getField(x, y) != Board.MISSED_SHOT && playerBoard.getField(x, y) == Board.HIT);
+
+        return new int[]{x, y};
+    }
+
+    private int[] level1Algorithm() {
+        return new int[2];
+    }
+
+    private int[] level2Algorithm() {
+        return new int[2];
+    }
+
+    private int[] level4Algorithm() {
         if (lastMoves.isEmpty()) {
             Random r = new Random();
             int x, y;
             do {
                 x = r.nextInt(Board.BOARD_SIZE);
                 y = r.nextInt(Board.BOARD_SIZE);
-            } while (playerBoard.getField(x, y) == Board.HIT || playerBoard.getField(x, y) == Board.MISSED_SHOT);
-            if (playerBoard.getField(x, y) == Board.SHIP)
+            } while (this.playerBoard.getField(x, y) == Board.HIT || this.playerBoard.getField(x, y) == Board.MISSED_SHOT);
+            if (this.playerBoard.getField(x, y) == Board.SHIP)
                 lastMoves.add(new int[] {x, y});
             return new int[]{x, y};
         }
@@ -44,13 +84,13 @@ public class AI {
                 }
                 if (collidesWithBorder(position[0] + dx) ||
                         collidesWithBorder(position[1] + dy) ||
-                        playerBoard.getField(position[0] + dx, position[1] + dy) == Board.MISSED_SHOT)
+                        this.playerBoard.getField(position[0] + dx, position[1] + dy) == Board.MISSED_SHOT)
                     this.testedDifferences.add(new int[] {dx, dy});
             } while (listContainsArray(this.testedDifferences, new int[] {dx, dy}));
             this.testedDifferences.add(new int[] {dx, dy});
             int[] move = new int[] {position[0] + dx,
                                     position[1] + dy};
-            if (hitsShip(move, playerBoard)) {
+            if (hitsShip(move)) {
                 this.lastMoves.add(move);
                 this.horizontal = dx % 2 != 0;
                 int sign = Integer.signum(this.horizontal ? dx : dy);
@@ -61,7 +101,7 @@ public class AI {
         int[] move = advance(this.lastMoves.get(lastMoves.size() - 1));
         if (collidesWithBorder(move[0]) ||
                 collidesWithBorder(move[1]) ||
-                hitsAgain(move, playerBoard)) {
+                hitsAgain(move)) {
             return this.resetAndTurnAround();
         }
         this.lastMoves.add(move);
@@ -88,13 +128,13 @@ public class AI {
         return point < 0 || point >= Board.BOARD_SIZE;
     }
 
-    private boolean hitsAgain(int[] move, Board board) {
-        return board.getField(move[0], move[1]) == Board.MISSED_SHOT ||
-                board.getField(move[0], move[1]) == Board.HIT;
+    private boolean hitsAgain(int[] move) {
+        return this.playerBoard.getField(move[0], move[1]) == Board.MISSED_SHOT ||
+                this.playerBoard.getField(move[0], move[1]) == Board.HIT;
     }
 
-    private boolean hitsShip(int[] move, Board board) {
-        return board.getField(move[0], move[1]) == Board.SHIP;
+    private boolean hitsShip(int[] move) {
+        return this.playerBoard.getField(move[0], move[1]) == Board.SHIP;
     }
 
     private int[] resetAndTurnAround() {
