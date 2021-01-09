@@ -10,7 +10,7 @@ public class BattleshipGame {
 
     final Board playerBoard;
     final Board villainBoard;
-    final AI villainAI = new AI(2);
+    final AI villainAI;
 
     /**
      * Set to TRUE to keep the game loop running. Set to FALSE to exit.
@@ -23,7 +23,7 @@ public class BattleshipGame {
      */
     private final boolean hideVillainShips = false;
 
-    private final int AILevel = 2;
+    private final int AILevel = 4;
 
     /**
      * Creates a new game with new boards.
@@ -31,6 +31,7 @@ public class BattleshipGame {
     public BattleshipGame() {
         this.playerBoard = new Board();
         this.villainBoard = new Board();
+        this.villainAI = new AI(AILevel, this.playerBoard);
     }
 
     /**
@@ -39,6 +40,7 @@ public class BattleshipGame {
     public BattleshipGame(Board playerBoard, Board villainBoard) {
         this.playerBoard = playerBoard;
         this.villainBoard = villainBoard;
+        this.villainAI = new AI(AILevel, this.playerBoard);
     }
 
 
@@ -174,17 +176,7 @@ public class BattleshipGame {
      * @return An array with the two coordinates of the villain's shot.
      */
     private int[] getVillainShot() {
-        int x;
-        int y;
-
-        // Strategy to aim a shot: Pick a random field that is empty
-        /*do {
-            x = new Random().nextInt(Board.BOARD_SIZE);
-            y = new Random().nextInt(Board.BOARD_SIZE);
-        } while (playerBoard.getField(x, y) != Board.MISSED_SHOT && playerBoard.getField(x, y) == Board.HIT);
-
-        int[] shot = new int[]{x, y};*/
-        int[] shot = villainAI.nextMove(this.playerBoard);
+        int[] shot = villainAI.nextMove();
         System.out.println("Gegner zielt auf " + convertCoordinatesToString(shot));
         return shot;
     }
