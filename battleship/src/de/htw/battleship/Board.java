@@ -1,5 +1,6 @@
 package de.htw.battleship;
 
+import java.util.ArrayList;
 import java.util.Random;
 
 /**
@@ -25,53 +26,39 @@ public class Board {
 
     public static final int BOARD_SIZE = 10;
 
-    public static final int[] ships = new int[]{5, 4, 3, 3, 2, 2};
+    public static final int[] shipLengths = new int[]{5, 4, 3, 3, 2, 2};
 
     private final char[][] fields = new char[BOARD_SIZE][BOARD_SIZE];
-    private final int[][] shipPositions = new int[6][4];
-    private int[] lastMove = new int[] {-1, -1};
+    private final ArrayList<Ship> ships = new ArrayList<>();
+    private Vector2d lastMove = new Vector2d(-1, -1);
 
     public int shoot(int[] coordinates) {
         int x = coordinates[0];
         int y = coordinates[1];
         if (fields[x][y] == HIT)
             return 0;
+        this.lastMove = new Vector2d(x, y);
         boolean hit = fields[x][y] == SHIP;
         if (!hit) {
             fields[x][y] = MISSED_SHOT;
-            lastMove = new int[] {x, y};
             return 0;
         }
         fields[x][y] = HIT;
-        for (int i = 0; i < shipPositions.length; i++) {
-            if (shipPositions[i] == null)
-                continue;
-            if (isShipSunk(shipPositions[i][0], shipPositions[i][1], shipPositions[i][2], shipPositions[i][3])) {
-                shipPositions[i] = null;
-                lastMove = new int[] {x, y};
+        for (Ship ship :
+                ships) {
+            if (isShipSunk(ship)) {
+                ships.remove(ship);
                 return 2;
             }
         }
-        lastMove = new int[] {x, y};
         return 1;
     }
 
-    private void addPosition(int x, int y, int shipLength, int horizontal) {
-        for (int i = 0; i < shipPositions.length; i++) {
-            if (shipPositions[i][2] == 0) {
-                shipPositions[i][0] = x;
-                shipPositions[i][1] = y;
-                shipPositions[i][2] = shipLength;
-                shipPositions[i][3] = horizontal;
-                return;
-            }
-        }
-    }
-
-    private boolean isShipSunk(int x, int y, int shipLength, int horizontal) {
-        int down = (horizontal - 1) * -1;
-        for (int i = 0; i < shipLength; i++) {
-            if (fields[x + i * horizontal][y + i * down] == SHIP) {
+    private boolean isShipSunk(Ship ship) {
+        int right = ship.isHorizontal() ? 1 : 0;
+        int down = ship.isVertical() ? 0 : 1;
+        for (int i = 0; i < ship.getShipLength(); i++) {
+            if (fields[ship.x + i * right][ship.y + i * down] == SHIP) {
                 return false;
             }
         }
@@ -94,30 +81,31 @@ public class Board {
                 fields[x + right][y + down] == SHIP;
     }
 
-    private int[] generatePosition(int shipLength) {
+    private Ship generateShipPosition(int shipLength) {
         Random r = new Random();
         boolean horizontal;
         while (true) {
             horizontal = r.nextBoolean();
-            int x = r.nextInt(BOARD_SIZE - (horizontal ? shipLength : 0));
-            int y = r.nextInt(BOARD_SIZE - (!horizontal ? shipLength : 0));
+            Vector2d position = new Vector2d(r.nextInt(BOARD_SIZE - (horizontal ? shipLength : 0)),
+                    r.nextInt(BOARD_SIZE - (!horizontal ? shipLength : 0)));
             boolean collides = false;
             for (int i = 0; i < shipLength; i++) {
-                if (checkSurroundings(x + (horizontal ? i : 0),
-                        y + (!horizontal ? i : 0))) {
+                if (checkSurroundings(position.x + (horizontal ? i : 0),
+                        position.y + (!horizontal ? i : 0))) {
                     collides = true;
                     break;
                 }
             }
             if (collides)
                 continue;
-            this.addPosition(x, y, shipLength, horizontal ? 1 : 0);
-            return new int[]{x, y, horizontal ? 1 : 0};
+            Ship newShip = new Ship(position, shipLength, horizontal);
+            this.ships.add(newShip);
+            return newShip;
         }
     }
 
     public void deactivateLastMove() {
-        this.lastMove = new int[] {-1, -1};
+        this.lastMove = new Vector2d(-1, -1);
     }
 
     /**
@@ -130,12 +118,12 @@ public class Board {
             }
         }
 
-        for (int shipLength : ships) {
-            int[] position = generatePosition(shipLength);
-            boolean horizontal = position[2] == 1;
-            boolean vertical = position[2] == 0;
+        for (int shipLength : shipLengths) {
+            Ship ship = generateShipPosition(shipLength);
+            boolean horizontal = ship.isHorizontal();
+            boolean vertical = ship.isVertical();
             for (int j = 0; j < shipLength; j++) {
-                fields[position[0] + (horizontal ? j : 0)][position[1] + (vertical ? j : 0)] = SHIP;
+                fields[ship.x + (horizontal ? j : 0)][ship.y + (vertical ? j : 0)] = SHIP;
             }
         }
 
@@ -179,13 +167,13 @@ public class Board {
                 char output = fields[x][y];
                 if (output == SHIP && hideShips)
                     output = EMPTY;
-                System.out.print(((lastMove[0] == x && lastMove[1] == y) ? ANSI_GREEN :
-                                    output == SHIP ? ANSI_BLUE :
-                                    output == HIT ? ANSI_RED :
-                                    output == MISSED_SHOT ? ANSI_YELLOW : "")
-                                    + output
-                                    + (output != EMPTY ? ANSI_RESET : "")
-                                    + " ");
+                System.out.print(((lastMove.x == x && lastMove.y == y) ? ANSI_GREEN :
+                        output == SHIP ? ANSI_BLUE :
+                        output == HIT ? ANSI_RED :
+                        output == MISSED_SHOT ? ANSI_YELLOW : "")
+                        + output
+                        + (output != EMPTY ? ANSI_RESET : "")
+                        + " ");
             }
             System.out.println();
         }
