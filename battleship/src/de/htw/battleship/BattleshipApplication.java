@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.Scanner;
 
 /**
@@ -26,10 +25,11 @@ public class BattleshipApplication {
      */
     private void mainMenu() {
         int option;
+        Scanner scanner = new Scanner(System.in);
         while (true) {
             int nOfOptions = printMenu();
             System.out.print("\nOption: ");
-            String input = new Scanner(System.in).nextLine();
+            String input = scanner.nextLine();
             System.out.println();
             try {
                 option = Integer.parseInt(input);
@@ -64,7 +64,7 @@ public class BattleshipApplication {
                 wrongInput();
             }
         }
-
+        scanner.close();
         System.out.println("Vielen Dank für's Spielen! Ich hoffe, Sie hatten Spaß. " +
                 "Bis zum nächsten Mal!");
     }
