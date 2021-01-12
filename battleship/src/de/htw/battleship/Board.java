@@ -56,7 +56,7 @@ public class Board {
 
     private boolean isShipSunk(Ship ship) {
         int right = ship.isHorizontal() ? 1 : 0;
-        int down = ship.isVertical() ? 0 : 1;
+        int down = ship.isVertical() ? 1 : 0;
         for (int i = 0; i < ship.getShipLength(); i++) {
             if (fields[ship.x + i * right][ship.y + i * down] == SHIP) {
                 return false;
