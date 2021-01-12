@@ -102,7 +102,14 @@ public class AI {
         if (collidesWithBorder(move[0]) ||
                 collidesWithBorder(move[1]) ||
                 hitsAgain(move)) {
-            return this.resetAndTurnAround();
+            this.resetAndTurnAround();
+            move = advance(this.lastMoves.get(lastMoves.size() - 1));
+            this.lastMoves.add(move);
+            return move;
+        }
+        if (this.misses(move)) {
+            this.resetAndTurnAround();
+            return move;
         }
         this.lastMoves.add(move);
         return move;
@@ -137,14 +144,15 @@ public class AI {
         return this.playerBoard.getField(move[0], move[1]) == Board.SHIP;
     }
 
-    private int[] resetAndTurnAround() {
+    private boolean misses(int[] move) {
+        return this.playerBoard.getField(move[0], move[1]) == Board.EMPTY;
+    }
+
+    private void resetAndTurnAround() {
             this.direction *= -1;
             int[] startingPoint = lastMoves.get(0);
             this.lastMoves.clear();
             this.lastMoves.add(startingPoint);
-            int[] move = advance(startingPoint);
-            this.lastMoves.add(move);
-            return move;
         }
 
     public void loseMemory() {
