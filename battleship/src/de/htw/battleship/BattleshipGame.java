@@ -1,6 +1,5 @@
 package de.htw.battleship;
 
-import java.util.Random;
 import java.util.Scanner;
 
 /**
@@ -74,9 +73,15 @@ public class BattleshipGame {
 
     private static void printResult(int result) {
         switch (result) {
-            case 0 -> System.out.println("Daneben! Schade...");
-            case 1 -> System.out.println("Treffer!");
-            case 2 -> System.out.println("Piratenschiff versenkt!");
+            case 0:
+                System.out.println("Daneben! Schade...");
+                break;
+            case 1: 
+                System.out.println("Treffer!");
+                break;
+            case 2: 
+                System.out.println("Piratenschiff versenkt!");
+                break;
         }
     }
 
@@ -93,7 +98,9 @@ public class BattleshipGame {
         int[] playerShot = null;
 
         System.out.print("Feld: ");
-        String input = new Scanner(System.in).nextLine();
+        Scanner scanner = new Scanner(System.in);
+        String input = scanner.nextLine();
+        scanner.close();
         if (validateInput(input)) {
             playerShot = convertCoordinatesToInt(input);
         }
@@ -168,7 +175,9 @@ public class BattleshipGame {
         System.out.println();
         System.out.println("Drücke ENTER um fortzufahren...");
         System.out.println();
-        new Scanner(System.in).nextLine();
+        Scanner scanner = new Scanner(System.in);
+        scanner.nextLine();
+        scanner.close();
     }
 
     /**
