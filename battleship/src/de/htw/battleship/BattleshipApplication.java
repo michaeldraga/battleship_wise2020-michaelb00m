@@ -25,7 +25,7 @@ public class BattleshipApplication {
      */
     private void mainMenu() {
         int option;
-        Scanner scanner = new Scanner(System.in);
+       Scanner scanner = new Scanner(System.in);
         while (true) {
             int nOfOptions = printMenu();
             System.out.print("\nOption: ");
@@ -64,9 +64,9 @@ public class BattleshipApplication {
                 wrongInput();
             }
         }
-        scanner.close();
         System.out.println("Vielen Dank für's Spielen! Ich hoffe, Sie hatten Spaß. " +
                 "Bis zum nächsten Mal!");
+        scanner.close();
     }
 
     private static void wrongInput() {
@@ -77,10 +77,10 @@ public class BattleshipApplication {
     private int printMenu() {
         int n = 0;
         boolean runningGame = hasRunningGame();
-        String menuOutput = String.format("(%d) Neues Spiel starten\n", ++n);
-        menuOutput += runningGame ? String.format("(%d) Spiel fortsetzen\n", ++n) : "";
-        menuOutput += hasSavedGame() ? String.format("(%d) Spiel laden\n", ++n) : "";
-        menuOutput += runningGame ? String.format("(%d) Spiel speichern\n", ++n) : "";
+        String menuOutput = String.format("(%d) Neues Spiel starten%n", ++n);
+        menuOutput += runningGame ? String.format("(%d) Spiel fortsetzen%n", ++n) : "";
+        menuOutput += hasSavedGame() ? String.format("(%d) Spiel laden%n", ++n) : "";
+        menuOutput += runningGame ? String.format("(%d) Spiel speichern%n", ++n) : "";
         menuOutput += String.format("(%d) Beenden", ++n);
         System.out.println(menuOutput);
         return n;
