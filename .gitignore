@@ -1,1 +1,7 @@
 /bin/
+/classes/
+/battleship.save
+/highScores.save
+/prog1-battleship.iml
+/battleship/src/META-INF/
+/.idea/

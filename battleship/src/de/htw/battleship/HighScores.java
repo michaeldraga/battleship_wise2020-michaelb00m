@@ -63,7 +63,7 @@ public class HighScores {
         System.out.println("High Scores:");
         System.out.println("Place    Score    Name");
         for (int i = 0; i < highScores.size(); i++) {
-            System.out.println(String.format("%d        %d        %s", i + 1, highScores.get(i).getScore(), highScores.get(i).getPlayerName()));
+            System.out.printf("%d        %d        %s%n", i + 1, highScores.get(i).getScore(), highScores.get(i).getPlayerName());
         }
         System.out.println("\n");
     }

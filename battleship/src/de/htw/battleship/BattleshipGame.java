@@ -25,7 +25,7 @@ public class BattleshipGame {
      * When playing, enemy ships should be hidden from the player.
      * Change below to FALSE for testing purposes during development of this program.
      */
-    private final boolean hideVillainShips = false;
+    private final boolean hideVillainShips = true;
 
     /**
      * Creates a new game with new boards.

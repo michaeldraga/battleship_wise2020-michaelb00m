@@ -234,13 +234,12 @@ public class BattleshipApplication {
         try {
             file.createNewFile();
 
-            StringBuilder output = new StringBuilder();
-            output.append(this.game.playerBoard.exportAsString());
-            output.append(this.game.villainBoard.exportAsString());
-            output.append(this.game.getAILevel()).append("\n");
-            output.append(this.game.getPlayerName()).append("\n");
-            output.append(this.game.getShots()).append("\n");
-            Files.writeString(file.toPath(), output.toString(), StandardCharsets.UTF_8);
+            String output = this.game.playerBoard.exportAsString() +
+                    this.game.villainBoard.exportAsString() +
+                    this.game.getAILevel() + "\n" +
+                    this.game.getPlayerName() + "\n" +
+                    this.game.getShots() + "\n";
+            Files.writeString(file.toPath(), output, StandardCharsets.UTF_8);
 
             System.out.println("Erfolgreich gespeichert.\n");
         } catch (IOException e) {

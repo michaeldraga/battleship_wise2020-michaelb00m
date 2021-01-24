@@ -54,7 +54,7 @@ public class AI {
             default:
                 nextMove = new Vector2d();
                 break;
-        };
+        }
         return nextMove;
     }
 
