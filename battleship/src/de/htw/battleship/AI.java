@@ -7,7 +7,7 @@ import java.util.Random;
 public class AI {
     private final ArrayList<int[]> lastMoves = new ArrayList<>();
     private final ArrayList<int[]> testedDifferences = new ArrayList<>();
-    private final int level;
+    private int level;
     private final Board playerBoard;
 
     private Boolean horizontal;
@@ -255,5 +255,13 @@ public class AI {
         this.direction = 0;
         this.testedDifferences.clear();
         this.lastMoves.clear();
+    }
+
+    public int getLevel() {
+        return level;
+    }
+
+    public void setLevel(int level) {
+        this.level = level;
     }
 }
