@@ -4,12 +4,17 @@ import java.util.Scanner;
 
 /**
  * An instance of this class holds the state of a running match and the game logic.
+ * @author Michael Draga
+ * @version 1.0
  */
 public class BattleshipGame {
 
     final Board playerBoard;
     final Board villainBoard;
     final AI villainAI;
+    final String playerName;
+    int shots = 0;
+    boolean playerWon = false;
 
     /**
      * Set to TRUE to keep the game loop running. Set to FALSE to exit.
@@ -22,24 +27,32 @@ public class BattleshipGame {
      */
     private final boolean hideVillainShips = false;
 
-    private final int AILevel = 4;
-
     /**
      * Creates a new game with new boards.
+     * @param AILevel The chosen AI difficulty level
+     * @param playerName The chosen player name
      */
-    public BattleshipGame() {
+    public BattleshipGame(int AILevel, String playerName) {
         this.playerBoard = new Board();
         this.villainBoard = new Board();
         this.villainAI = new AI(AILevel, this.playerBoard);
+        this.playerName = playerName;
     }
 
     /**
      * Creates a game based on saved boards from a previous game.
+     * @param playerBoard The saved player board
+     * @param villainBoard The saved villain board
+     * @param AILevel The saved AI difficulty level
+     * @param playerName The saved name of the player
+     * @param shots The saved amount of shots fired by the player in the saved game
      */
-    public BattleshipGame(Board playerBoard, Board villainBoard) {
+    public BattleshipGame(Board playerBoard, Board villainBoard, int AILevel, String playerName, int shots) {
         this.playerBoard = playerBoard;
         this.villainBoard = villainBoard;
         this.villainAI = new AI(AILevel, this.playerBoard);
+        this.playerName = playerName;
+        this.shots = shots;
     }
 
 
@@ -57,13 +70,18 @@ public class BattleshipGame {
         }
     }
 
+    /**
+     * Checks whether the input has the correct format
+     * (first char is letter from a-z or A-Z, rest is a number less than 10,
+     * string length less than 4)
+     * @param input The input string that needs to be checked
+     * @return Whether the given input has a valid format or not
+     */
     private static boolean validateInput(String input) {
-        if (input.length() == 0)
-            return false;
         try {
             return !(input.length() > 3 ||
                 input.toUpperCase().charAt(0) - 65 < 0 ||
-                input.toUpperCase().charAt(0) - 65 > 10 ||
+                input.toUpperCase().charAt(0) - 65 > 9 ||
                 Integer.parseInt(input.substring(1)) < 0 ||
                 Integer.parseInt(input.substring(1)) > 10);
         } catch (NumberFormatException e) {
@@ -71,6 +89,10 @@ public class BattleshipGame {
         }
     }
 
+    /**
+     * Prints the result of the shot on the console, given the result code
+     * @param result The result code returned from the Board.shoot method
+     */
     private static void printResult(int result) {
         switch (result) {
             case 0:
@@ -95,22 +117,25 @@ public class BattleshipGame {
         villainBoard.print(hideVillainShips);
         System.out.println();
 
-        int[] playerShot = null;
+        Vector2d playerShot;
 
         System.out.print("Feld: ");
         Scanner scanner = new Scanner(System.in);
         String input = scanner.nextLine();
-        scanner.close();
-        if (validateInput(input)) {
-            playerShot = convertCoordinatesToInt(input);
-        }
-        // player wants to exit game
-        if (playerShot == null) {
+        if (input.equals("")) {
             System.out.println("Spiel pausiert.");
             running = false;
             return;
+        } else if (validateInput(input)) {
+            playerShot = convertCoordinatesToInt(input);
+        } else {
+            System.out.println("Bitte geben Sie zuerst einen Buchstaben von A bis J (Großschreibung irrelevant)" +
+                    " und direkt danach eine Zahl von 1 bis 10 ein. Beispiel: a1 (gleichbedeutend zu A1)");
+            playersTurn();
+            return;
         }
         int result = villainBoard.shoot(playerShot);
+        shots++;
 
         System.out.println();
 
@@ -123,6 +148,7 @@ public class BattleshipGame {
         if (this.isFinished()) {
             System.out.println("\nSie haben gewonnen! Herzlichen Glückwunsch!\n");
             this.running = false;
+            this.playerWon = true;
             return;
         }
 
@@ -138,7 +164,7 @@ public class BattleshipGame {
 
         System.out.println("Gegner ist am Zug.");
         playerBoard.print(false);
-        int[] villainShot = getVillainShot();
+        Vector2d villainShot = getVillainShot();
         System.out.println();
 
         int result = playerBoard.shoot(villainShot);
@@ -177,15 +203,14 @@ public class BattleshipGame {
         System.out.println();
         Scanner scanner = new Scanner(System.in);
         scanner.nextLine();
-        scanner.close();
     }
 
     /**
      * Gets an array with the two coordinates (x,y) the villain shoots at.
      * @return An array with the two coordinates of the villain's shot.
      */
-    private int[] getVillainShot() {
-        int[] shot = villainAI.nextMove();
+    private Vector2d getVillainShot() {
+        Vector2d shot = villainAI.nextMove();
         System.out.println("Gegner zielt auf " + convertCoordinatesToString(shot));
         return shot;
     }
@@ -202,21 +227,55 @@ public class BattleshipGame {
 
     /**
      * Converts alphanumeric board coordinates to array indexes, e.g. A1 to [0,0]
+     * @param input The input string that needs to be converted
      * @return An array containing the coordinates from the input string.
      */
-    public static int[] convertCoordinatesToInt(String input) {
+    public static Vector2d convertCoordinatesToInt(String input) {
         int x = input.toUpperCase().charAt(0) - 65;
         int y = Integer.parseInt(input.substring(1)) - 1;
-        return new int[]{x, y};
+        return new Vector2d(x, y);
     }
 
     /**
-     * Converts array indexes to ahlphanumeric board coordinates, e.g. [0,0] to A1
+     * Converts a Vector2d to ahlphanumeric board coordinates, e.g. [0,0] to A1
+     * @param input input coordinates that need to be converted
      * @return String coordinates made from the numeric board coordinates.
      */
-    public static String convertCoordinatesToString(int[] input) {
-        char x = (char) (input[0] + 65);
-        String y = Integer.toString(input[1] + 1);
+    public static String convertCoordinatesToString(Vector2d input) {
+        char x = (char) (input.x + 65);
+        String y = Integer.toString(input.y + 1);
         return x + y;
+    }
+
+    /**
+     * Wrapper for the setter of the difficulty level of the AI
+     * @param AILevel The desired difficulty level for the AI
+     */
+    public void setAILevel(int AILevel) {
+        this.villainAI.setLevel(AILevel);
+    }
+
+    /**
+     * Wrapper for the getter of the difficulty level of the AI
+     * @return The difficulty level of the AI
+     */
+    public int getAILevel() {
+        return this.villainAI.getLevel();
+    }
+
+    /**
+     * Getter of the attribute playerName
+     * @return The name of the player currently playing
+     */
+    public String getPlayerName() {
+        return playerName;
+    }
+
+    /**
+     * Getter of the attribute shots
+     * @return The shots that have been fired by the player in the current match
+     */
+    public int getShots() {
+        return shots;
     }
 }
