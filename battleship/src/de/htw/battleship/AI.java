@@ -1,12 +1,17 @@
 package de.htw.battleship;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Random;
 
+/**
+ * An instance of this class can generate shots for the villain (computer) to
+ * play, using 5 algorithms with different difficulties.
+ * @author Michael Draga
+ * @version 1.0
+ */
 public class AI {
-    private final ArrayList<int[]> lastMoves = new ArrayList<>();
-    private final ArrayList<int[]> testedDifferences = new ArrayList<>();
+    private final ArrayList<Vector2d> lastMoves = new ArrayList<Vector2d>();
+    private final ArrayList<Vector2d> testedDifferences = new ArrayList<Vector2d>();
     private int level;
     private final Board playerBoard;
 
@@ -28,23 +33,37 @@ public class AI {
      * difficulty level
      * @return The move returned from the executed algorithm
      */
-    public int[] nextMove() {
-        return switch (this.level) {
-            case 0 -> level0Algorithm();
-            case 1 -> level1Algorithm();
-            case 2 -> level2Algorithm();
-            case 3 -> level3Algorithm();
-            case 4 -> level4Algorithm();
-            default -> new int[2];
+    public Vector2d nextMove() {
+        Vector2d nextMove;
+        switch (this.level) {
+            case 0:
+                nextMove = level0Algorithm();
+                break;
+            case 1:
+                nextMove = level1Algorithm();
+                break;
+            case 2:
+                nextMove = level2Algorithm();
+                break;
+            case 3:
+                nextMove = level3Algorithm();
+                break;
+            case 4:
+                nextMove = level4Algorithm();
+                break;
+            default:
+                nextMove = new Vector2d();
+                break;
         };
+        return nextMove;
     }
 
     /**
      * Algorithm for AI testing difficulty.
-     * Designed to not hit any ships --> Cannot win.
+     * Designed to not hit any ships, cannot win.
      * @return The position to play in the next move
      */
-    private int[] level0Algorithm() {
+    private Vector2d level0Algorithm() {
         int x;
         int y;
 
@@ -52,9 +71,9 @@ public class AI {
         do {
             x = new Random().nextInt(Board.BOARD_SIZE);
             y = new Random().nextInt(Board.BOARD_SIZE);
-        } while (playerBoard.getField(x, y) != Board.MISSED_SHOT && playerBoard.getField(x, y) == Board.HIT);
+        } while (playerBoard.getField(x, y) != Board.EMPTY && playerBoard.getField(x, y) != Board.MISSED_SHOT);
 
-        return new int[]{x, y};
+        return new Vector2d(x, y);
     }
 
     /**
@@ -62,9 +81,9 @@ public class AI {
      * Chooses the next played position completely random.
      * @return The position to play in the next move
      */
-    private int[] level1Algorithm() {
+    private Vector2d level1Algorithm() {
         Random r = new Random();
-        return new int[]{r.nextInt(Board.BOARD_SIZE), r.nextInt(Board.BOARD_SIZE)};
+        return new Vector2d(r.nextInt(Board.BOARD_SIZE), r.nextInt(Board.BOARD_SIZE));
     }
 
     /**
@@ -73,14 +92,14 @@ public class AI {
      * that have already been hit (or missed).
      * @return The position to play in the next move
      */
-    private int[] level2Algorithm() {
+    private Vector2d level2Algorithm() {
         Random r = new Random();
         int x, y;
         do {
             x = r.nextInt(Board.BOARD_SIZE);
             y = r.nextInt(Board.BOARD_SIZE);
         } while (playerBoard.getField(x, y) == Board.HIT || playerBoard.getField(x, y) == Board.MISSED_SHOT);
-        return new int[]{x, y};
+        return new Vector2d(x, y);
     }
 
     /**
@@ -93,7 +112,7 @@ public class AI {
      * continues in the other direction until the ship is sunk.
      * @return The position to play in the next move
      */
-    private int[] level3Algorithm() {
+    private Vector2d level3Algorithm() {
         if (lastMoves.isEmpty()) {
             Random r = new Random();
             int x, y;
@@ -102,32 +121,32 @@ public class AI {
                 y = r.nextInt(Board.BOARD_SIZE);
             } while (this.playerBoard.getField(x, y) == Board.HIT || this.playerBoard.getField(x, y) == Board.MISSED_SHOT);
             if (this.playerBoard.getField(x, y) == Board.SHIP)
-                lastMoves.add(new int[]{x, y});
-            return new int[]{x, y};
+                lastMoves.add(new Vector2d(x, y));
+            return new Vector2d(x, y);
         }
         if (horizontal == null) {
             Random r = new Random();
-            int[] position = lastMoves.get(0);
+            Vector2d position = lastMoves.get(0);
             int direction, dx, dy, difference;
             do {
                 if (this.testedDifferences.size() % 2 == 1) {
-                    int[] differences = this.testedDifferences.get(this.testedDifferences.size() - 1);
-                    dx = differences[1];
-                    dy = differences[0];
+                    Vector2d differences = this.testedDifferences.get(this.testedDifferences.size() - 1);
+                    dx = differences.x;
+                    dy = differences.y;
                 } else {
                     direction = r.nextInt(4);
                     difference = direction - 2;
                     dx = difference % 2;
                     dy = (difference + 1) % 2;
                 }
-                if (collidesWithBorder(position[0] + dx) ||
-                        collidesWithBorder(position[1] + dy) ||
-                        this.playerBoard.getField(position[0] + dx, position[1] + dy) == Board.MISSED_SHOT)
-                    this.testedDifferences.add(new int[]{dx, dy});
-            } while (listContainsArray(this.testedDifferences, new int[]{dx, dy}));
-            this.testedDifferences.add(new int[]{dx, dy});
-            int[] move = new int[]{position[0] + dx,
-                    position[1] + dy};
+                if (collidesWithBorder(position.x + dx) ||
+                        collidesWithBorder(position.y + dy) ||
+                        this.playerBoard.getField(position.x + dx, position.y + dy) == Board.MISSED_SHOT)
+                    this.testedDifferences.add(new Vector2d(dx, dy));
+            } while (listContainsArray(this.testedDifferences, new Vector2d(dx, dy)));
+            this.testedDifferences.add(new Vector2d(dx, dy));
+            Vector2d move = new Vector2d(position.x + dx,
+                    position.y + dy);
             if (hitsShip(move)) {
                 this.lastMoves.add(move);
                 this.horizontal = dx % 2 != 0;
@@ -136,9 +155,9 @@ public class AI {
             }
             return move;
         }
-        int[] move = advance(this.lastMoves.get(lastMoves.size() - 1));
-        if (collidesWithBorder(move[0]) ||
-                collidesWithBorder(move[1]) ||
+        Vector2d move = advance(this.lastMoves.get(lastMoves.size() - 1));
+        if (collidesWithBorder(move.x) ||
+                collidesWithBorder(move.y) ||
                 hitsAgain(move)) {
             this.resetAndTurnAround();
             move = advance(this.lastMoves.get(lastMoves.size() - 1));
@@ -160,27 +179,27 @@ public class AI {
      * that contain a ship.
      * @return The position to play in the next move
      */
-    private int[] level4Algorithm() {
+    private Vector2d level4Algorithm() {
         Random r = new Random();
         int x, y;
         do {
             x = r.nextInt(Board.BOARD_SIZE);
             y = r.nextInt(Board.BOARD_SIZE);
         } while (playerBoard.getField(x,y) != Board.SHIP);
-        return new int[] {x,y};
+        return new Vector2d(x,y);
     }
 
     /**
-     * Checks if an ArrayList\<int[]\> contains a specific int[]
+     * Checks if an ArrayList of type Vector2d contains a specific Vector2d
      * @param arrayList The array list to be checked
-     * @param ints The int[] to be checked
+     * @param vector The int[] to be checked
      * @return Whether the given array list contains the given int[]
      */
-    private boolean listContainsArray(ArrayList<int[]> arrayList, int[] ints) {
-        for (int[] listInts :
+    private boolean listContainsArray(ArrayList<Vector2d> arrayList, Vector2d vector) {
+        for (Vector2d listVector :
                 arrayList) {
-            if (listInts != null) {
-                if (Arrays.equals(listInts, ints))
+            if (listVector != null) {
+                if (Vector2d.equals(listVector, vector))
                     return true;
             }
         }
@@ -192,9 +211,9 @@ public class AI {
      * @param move The last "move" (position)
      * @return The next field in the current direction
      */
-    private int[] advance(int[] move) {
-        return new int[]{move[0] + (this.horizontal ? 1 : 0) * this.direction,
-                move[1] + (!this.horizontal ? 1 : 0) * this.direction};
+    private Vector2d advance(Vector2d move) {
+        return new Vector2d(move.x + (this.horizontal ? 1 : 0) * this.direction,
+                move.y + (!this.horizontal ? 1 : 0) * this.direction);
     }
 
     /**
@@ -212,9 +231,9 @@ public class AI {
      * @param move The position of the field being checked
      * @return Whether the field at the given position was already shot at
      */
-    private boolean hitsAgain(int[] move) {
-        return this.playerBoard.getField(move[0], move[1]) == Board.MISSED_SHOT ||
-                this.playerBoard.getField(move[0], move[1]) == Board.HIT;
+    private boolean hitsAgain(Vector2d move) {
+        return this.playerBoard.getField(move) == Board.MISSED_SHOT ||
+                this.playerBoard.getField(move) == Board.HIT;
     }
 
     /**
@@ -222,8 +241,8 @@ public class AI {
      * @param move The position of the field being checked
      * @return Whether the field at the given position is a SHIP
      */
-    private boolean hitsShip(int[] move) {
-        return this.playerBoard.getField(move[0], move[1]) == Board.SHIP;
+    private boolean hitsShip(Vector2d move) {
+        return this.playerBoard.getField(move) == Board.SHIP;
     }
 
     /**
@@ -231,8 +250,8 @@ public class AI {
      * @param move The position of the field being checked
      * @return Whether the field at the given position is a MISS
      */
-    private boolean misses(int[] move) {
-        return this.playerBoard.getField(move[0], move[1]) == Board.EMPTY;
+    private boolean misses(Vector2d move) {
+        return this.playerBoard.getField(move.x, move.y) == Board.EMPTY;
     }
 
     /**
@@ -241,7 +260,7 @@ public class AI {
      */
     private void resetAndTurnAround() {
         this.direction *= -1;
-        int[] startingPoint = lastMoves.get(0);
+        Vector2d startingPoint = lastMoves.get(0);
         this.lastMoves.clear();
         this.lastMoves.add(startingPoint);
     }
@@ -257,10 +276,18 @@ public class AI {
         this.lastMoves.clear();
     }
 
+    /**
+     * Getter for the level attribute
+     * @return The value of the level attribute (the AIs difficulty level)
+     */
     public int getLevel() {
         return level;
     }
 
+    /**
+     * Setter for the level attribute
+     * @param level The desired difficulty level for the AI
+     */
     public void setLevel(int level) {
         this.level = level;
     }
