@@ -6,18 +6,16 @@ import java.util.Random;
 /**
  * Holds the state of one players board
  * as well as the methods to generate a board and process shots.
+ * @author Michael Draga
+ * @version 1.0
  */
 public class Board {
 
-    public static final String ANSI_RESET = "\u001B[0m";
-    public static final String ANSI_BLACK = "\u001B[30m";
-    public static final String ANSI_RED = "\u001B[31m";
-    public static final String ANSI_GREEN = "\u001B[32m";
-    public static final String ANSI_YELLOW = "\u001B[33m";
-    public static final String ANSI_BLUE = "\u001B[34m";
-    public static final String ANSI_PURPLE = "\u001B[35m";
-    public static final String ANSI_CYAN = "\u001B[36m";
-    public static final String ANSI_WHITE = "\u001B[37m";
+    private static final String ANSI_RESET = "\u001B[0m";
+    private static final String ANSI_RED = "\u001B[31m";
+    private static final String ANSI_GREEN = "\u001B[32m";
+    private static final String ANSI_YELLOW = "\u001B[33m";
+    private static final String ANSI_BLUE = "\u001B[34m";
 
     public static final char EMPTY = '.';
     public static final char SHIP = 'O';
@@ -26,15 +24,40 @@ public class Board {
 
     public static final int BOARD_SIZE = 10;
 
-    public static final int[] shipLengths = new int[]{5, 4, 3, 3, 2, 2};
+    private static final int[] shipLengths = new int[]{5,4,3,3,2,2};
 
     private final char[][] fields = new char[BOARD_SIZE][BOARD_SIZE];
-    private final ArrayList<Ship> ships = new ArrayList<>();
+    private final ArrayList<Ship> ships;
     private Vector2d lastMove = new Vector2d(-1, -1);
 
-    public int shoot(int[] coordinates) {
-        int x = coordinates[0];
-        int y = coordinates[1];
+    /**
+     * Parses the ships from the saved string into Ships and returns an ArrayList
+     * containing them
+     * @param savedBoards The saved string containing the ships
+     * @return An ArrayList containing all saved ships from the string
+     */
+    public static ArrayList<Ship> stringToShips(String savedBoards) {
+        ArrayList<Ship> savedShips = new ArrayList<Ship>();
+        String[] sBoardsArray = savedBoards.split(";");
+        for (String sBoard :
+                sBoardsArray) {
+            String[] attributes = sBoard.split(",");
+            Ship sShip = new Ship(Integer.parseInt(attributes[0]), Integer.parseInt(attributes[1]),
+                                Integer.parseInt(attributes[2]), Boolean.parseBoolean(attributes[3]));
+            savedShips.add(sShip);
+        }
+        return savedShips;
+    }
+
+    /**
+     * "Shoots" the given coordinates and checks whether the shot resulted
+     * in a HIT, a MISSED_SHOT or even in a sunk ship.
+     * @param coordinates The Vector2d representing the coordinates being shot at
+     * @return The result code of the shot (0: miss/already hit, 1: hit, 2: ship sunk)
+     */
+    public int shoot(Vector2d coordinates) {
+        int x = coordinates.x;
+        int y = coordinates.y;
         if (fields[x][y] == HIT)
             return 0;
         this.lastMove = new Vector2d(x, y);
@@ -54,6 +77,11 @@ public class Board {
         return 1;
     }
 
+    /**
+     * Checks whether a ship is sunk and returns the result
+     * @param ship The ship being checked
+     * @return Whether the ship is sunk or not
+     */
     private boolean isShipSunk(Ship ship) {
         int right = ship.isHorizontal() ? 1 : 0;
         int down = ship.isVertical() ? 1 : 0;
@@ -65,6 +93,13 @@ public class Board {
         return true;
     }
 
+    /**
+     * Checks if the field at the given coordinates or any of its surrounding
+     * fields contain a SHIP
+     * @param x The x coordinate of the field being checked
+     * @param y The y coordinate of the field being checked
+     * @return Whether the field or any of its surrounding fields contain a ship
+     */
     private boolean checkSurroundings(int x, int y) {
         int left = x == 0 ? 0 : 1;
         int right = x >= BOARD_SIZE - 1 ? 0 : 1;
@@ -81,7 +116,14 @@ public class Board {
                 fields[x + right][y + down] == SHIP;
     }
 
-    private Ship generateShipPosition(int shipLength) {
+    /**
+     * Generates a new ship at a random position, with a random orientation
+     * of the given ship length, that does not intersect or touch any other
+     * ship.
+     * @param shipLength The desired length of the new ship
+     * @return A Ship object representing the new ship
+     */
+    private Ship generateShip(int shipLength) {
         Random r = new Random();
         boolean horizontal;
         while (true) {
@@ -104,6 +146,10 @@ public class Board {
         }
     }
 
+    /**
+     * "Deactivates" the last move by replacing it with a Vector2d containing
+     * impossible values (values that can not be generated elsewhere in code)
+     */
     public void deactivateLastMove() {
         this.lastMove = new Vector2d(-1, -1);
     }
@@ -117,29 +163,30 @@ public class Board {
                 fields[i][j] = EMPTY;
             }
         }
-
+        this.ships = new ArrayList<Ship>();
         for (int shipLength : shipLengths) {
-            Ship ship = generateShipPosition(shipLength);
+            Ship ship = generateShip(shipLength);
             boolean horizontal = ship.isHorizontal();
             boolean vertical = ship.isVertical();
             for (int j = 0; j < shipLength; j++) {
                 fields[ship.x + (horizontal ? j : 0)][ship.y + (vertical ? j : 0)] = SHIP;
             }
         }
-
-
     }
 
     /**
-     * Create a Board from an exported string.
+     * Create a Board and add its ships from an exported string.
+     * @param savedBoard The saved string representation of the board object
+     * @param savedShips An ArrayList containing the saved ships
      */
-    public Board(String savedBoard) {
+    public Board(String savedBoard, ArrayList<Ship> savedShips) {
         for (int y = 0; y < BOARD_SIZE; y++) {
             for (int x = 0; x < BOARD_SIZE; x++) {
                 int index = y * BOARD_SIZE + x;
                 fields[x][y] = savedBoard.charAt(index);
             }
         }
+        this.ships = savedShips;
     }
 
     /**
@@ -192,6 +239,21 @@ public class Board {
             }
         }
         builder.append("\n");
+        builder.append(this.convertShipsToString());
+        return builder.toString();
+    }
+
+    /**
+     * Exports the ships as one string.
+     * @return A string containing the ship attributes
+     */
+    private String convertShipsToString() {
+        StringBuilder builder = new StringBuilder();
+        for (Ship ship:
+             ships) {
+            builder.append(ship.toString()).append(";");
+        }
+        builder.append("\n");
         return builder.toString();
     }
 
@@ -219,5 +281,14 @@ public class Board {
      */
     public char getField(int x, int y) {
         return fields[x][y];
+    }
+
+    /**
+     * Gets the value of the field at coordinates x, y
+     * @param position A Vector2d representing the position of the desired field
+     * @return The value of the desired field
+     */
+    public char getField(Vector2d position) {
+        return fields[position.x][position.y];
     }
 }
